@@ -1,5 +1,4 @@
 # %%
-import torch
 import datetime
 import numpy as np
 import torch.nn.functional as F
