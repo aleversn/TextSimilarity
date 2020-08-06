@@ -25,7 +25,7 @@ dataiter_eval = DataLoader(myData_eval, batch_size=250)
 # %%
 config = BertConfig.from_json_file('./dataset/bert_config.json')
 config.num_labels = len(myDataset.cls_label_2_id)
-model = BertForSequenceClassification.from_pretrained('./model/bert_58_p2/pytorch_model.bin', config=config)
+model = BertForSequenceClassification.from_pretrained('./model/bert_pre58_1/pytorch_model.bin', config=config)
 
 model.cuda()
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")

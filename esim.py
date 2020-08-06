@@ -158,13 +158,13 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 if torch.cuda.device_count() > 1:
     esim = nn.DataParallel(esim, device_ids=[0, 1, 2, 3])
     esim.to(device)
-model_dict = torch.load("./model/esim/esim_sim_3.pth").module.state_dict()
+model_dict = torch.load("./model/esim_x/esim_sim_2.pth").module.state_dict()
 esim.module.load_state_dict(model_dict)
 
 criterion = nn.BCELoss()
-optimizer = torch.optim.Adam(esim.parameters())
+optimizer = torch.optim.Adam(esim.parameters(), lr=1e-3)
 
-save_offset = 3
+save_offset = 2
 num_epochs = 120
 for epoch in range(num_epochs):
     
@@ -198,8 +198,8 @@ for epoch in range(num_epochs):
         train_count += 1
         train_iter.set_description('Epoch: {}/{} Train'.format(epoch + 1, num_epochs))
         train_iter.set_postfix(train_loss=train_loss / train_count, train_acc=train_acc / train_count)
-    torch.save(esim, './model/esim/esim_sim_{}.pth'.format(epoch + 1 + save_offset))
-    WriteSDC('log_20200803.log', 'epoch: {} train_acc: {} loss: {}\n'.format(epoch + 1 + save_offset, train_acc / train_count, train_loss / train_count))
+    torch.save(esim, './model/esim_x/esim_sim_{}.pth'.format(epoch + 1 + save_offset))
+    WriteSDC('log_esim_x_20200803.log', 'epoch: {} train_acc: {} loss: {}\n'.format(epoch + 1 + save_offset, train_acc / train_count, train_loss / train_count))
     
     if epoch == 0 or epoch % 9 != 0:
         continue

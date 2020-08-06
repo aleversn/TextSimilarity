@@ -9,14 +9,14 @@ from torch.utils.data import TensorDataset, DataLoader, Dataset
 import torch.nn.functional as F
 from utils import *
 from tqdm import tqdm
-from trainDataloader import SimDataset, EvalSimDataset
+from trainDataloader import SimDataset, EvalSimDataset, EvalSimWithLabelDataset
 from transformers import BertModel, BertConfig, BertTokenizer, BertForSequenceClassification
 
 # %%
 tokenizer = BertTokenizer.from_pretrained('./dataset/vocab')
 
-eval_list = load_sim_dev('./dataset/computed/c_dev')
-myData_eval = EvalSimDataset(tokenizer, './dataset/std_data', 200)
+eval_list = load_sim_dev('./dataset/computed/c_dev_with_label')
+myData_eval = EvalSimWithLabelDataset(tokenizer, './dataset/std_data', 200)
 
 # %%
 class SelfAttention(nn.Module):
@@ -148,7 +148,7 @@ class ESIM(nn.Module):
         return similarity
 
 # %%
-EVAL_EPOCH = 36
+EVAL_EPOCH = 31
 esim = ESIM()
 if torch.cuda.is_available():
     esim.cuda()
@@ -159,6 +159,7 @@ if torch.cuda.device_count() > 1:
 model_dict = torch.load("./model/esim/esim_sim_{}.pth".format(EVAL_EPOCH)).module.state_dict()
 esim.module.load_state_dict(model_dict)
 
-eval(esim, eval_list, myData_eval, EVAL_EPOCH, 0)
+# eval(esim, eval_list, myData_eval, EVAL_EPOCH, 0)
+eval(esim, eval_list, myData_eval, EVAL_EPOCH, 0, 'log_eval_esim_with_label.log')
 
 # %%

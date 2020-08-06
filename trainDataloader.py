@@ -1,6 +1,7 @@
 # %%
 import torch
 import random
+from preprocess import Preprocess
 from torch.utils.data import TensorDataset, DataLoader, Dataset
 from transformers import BertModel, BertConfig, BertTokenizer, BertForSequenceClassification
 
@@ -30,6 +31,20 @@ class SimDataset(Dataset):
             ori_list = f.read().split('\n')
         ori_list = ori_list[:len(ori_list) - 1]
         return ori_list
+
+class BertSimDataset(SimDataset):
+
+    def __getitem__(self, idx):
+        sent_1, sent_2, label = self.ori_list[idx].strip().split('\t')
+        sentence = '{} [SEP] {}'.format(sent_1, sent_2)
+        T = self.tokenizer(sentence, add_special_tokens=True, max_length=self.padding_length, padding='max_length', truncation=True)
+        
+        sentence = torch.tensor(T['input_ids'])
+        attn_mask = torch.tensor(T['attention_mask'])
+        token_type_id = torch.tensor(T['token_type_ids'])
+    
+        label = torch.tensor(int(label))
+        return sentence, attn_mask, token_type_id, label
 
 class EvalSimDataset(Dataset):
     def __init__(self, tokenizer, std_name, padding_length=128):
@@ -69,6 +84,53 @@ class EvalSimDataset(Dataset):
             data_list = f.read().split('\n')
         data_list = data_list[:len(data_list) - 1]
         return data_list
+
+class EvalSimWithLabelDataset(EvalSimDataset):
+
+    def __init__(self, tokenizer, std_name, padding_length=128):
+        self.tokenizer = tokenizer
+        self.padding_length = padding_length
+        self.label_dict, self.std_dict, self.std_list = Preprocess.load_std(std_name)
+
+    def make_data(self, eval_data):
+        self.std_id = eval_data[0]
+        self.ext_id = eval_data[1]
+        self.label_id = eval_data[2]
+        self.eval_sentence = eval_data[3]
+        self.eval_list = []
+
+        for item in self.label_dict[self.label_id]:
+            self.eval_list.append([self.eval_sentence, item[1], item[0]])
+
+class BertEvalSimDataset(EvalSimDataset):
+
+    def __getitem__(self, idx):
+        sent_1, sent_2, cur_std_id = self.eval_list[idx]
+        sentence = '{} [SEP] {}'.format(sent_1, sent_2)
+        T = self.tokenizer(sentence, add_special_tokens=True, max_length=self.padding_length, padding='max_length', truncation=True)
+        
+        sentence = torch.tensor(T['input_ids'])
+        attn_mask = torch.tensor(T['attention_mask'])
+        token_type_id = torch.tensor(T['token_type_ids'])
+
+        return sentence, attn_mask, token_type_id, torch.tensor(int(cur_std_id))
+
+class BertEvalSimWithLabelDataset(BertEvalSimDataset):
+
+    def __init__(self, tokenizer, std_name, padding_length=128):
+        self.tokenizer = tokenizer
+        self.padding_length = padding_length
+        self.label_dict, self.std_dict, self.std_list = Preprocess.load_std(std_name)
+
+    def make_data(self, eval_data):
+        self.std_id = eval_data[0]
+        self.ext_id = eval_data[1]
+        self.label_id = eval_data[2]
+        self.eval_sentence = eval_data[3]
+        self.eval_list = []
+
+        for item in self.label_dict[self.label_id]:
+            self.eval_list.append([self.eval_sentence, item[1], item[0]])
 
 class ClsDataset(Dataset):
 
