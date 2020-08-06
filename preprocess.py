@@ -123,14 +123,14 @@ class Preprocess():
             f.write(result)
 
 # %%
-Preprocess.generate_cls_dict('./dataset/std_data', './dataset/cls_dict')
+# Preprocess.generate_cls_dict('./dataset/std_data', './dataset/cls_dict')
 
-# %%
-Preprocess.split_train('./dataset/computed/cls_data', 'cls_train', 'cls_test', 248000)
+# # %%
+# Preprocess.split_train('./dataset/computed/cls_data', 'cls_train', 'cls_test', 248000)
 
-# %%
-Preprocess.process_dev_data_with_label('./dataset/std_data', './dataset/computed/c_dev', './dataset/computed/c_dev_with_label')
+# # %%
+# Preprocess.process_dev_data_with_label('./dataset/std_data', './dataset/computed/c_dev', './dataset/computed/c_dev_with_label')
 
-# %%
-label_dict, std_dict, std_list = Preprocess.load_std('./dataset/std_data')
+# # %%
+# label_dict, std_dict, std_list = Preprocess.load_std('./dataset/std_data')
 # %%
