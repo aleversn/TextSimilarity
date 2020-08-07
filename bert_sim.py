@@ -32,11 +32,11 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 model = torch.nn.DataParallel(model, device_ids=[0, 1, 2, 3]).cuda()
 model.to(device)
 
-model_dict = torch.load("./model/bert_sim/bert_sim_2.pth").module.state_dict()
+model_dict = torch.load("./model/bert_sim/bert_sim_1.pth").module.state_dict()
 model.module.load_state_dict(model_dict)
 
 # %%
-optimizer = optim.Adam(model.parameters(), lr=1e-4, weight_decay=0.)
+optimizer = optim.Adam(model.parameters(), lr=1e-5, weight_decay=0.)
 
 save_offset = 2
 num_epochs = 120
@@ -80,9 +80,9 @@ for epoch in range(num_epochs):
     torch.save(model, './model/bert_sim/bert_sim_{}.pth'.format(epoch + 1 + save_offset))
     WriteSDC('log_bert_sim.log', 'epoch: {} train_acc: {} loss: {}\n'.format(epoch + 1 + save_offset, train_acc / train_count, train_loss / train_count))
     
-    if epoch == 0 or epoch % 9 != 0:
+    if epoch == 0 or epoch % 2 != 0:
         continue
-    
+    # %%
     eval_bert(model, eval_list, myData_eval, epoch, save_offset, 'log_bert_sim_eval.log')
 
 # %%

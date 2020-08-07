@@ -134,3 +134,9 @@ class Preprocess():
 # # %%
 # label_dict, std_dict, std_list = Preprocess.load_std('./dataset/std_data')
 # %%
+# Preprocess.split_train('./dataset/train_data', '101_train', '101_test', 232355)
+
+# %%
+# Preprocess.process_sim_data('./dataset/std_data', './dataset/101/c_train', './dataset/101/final_train')
+
+# %%
