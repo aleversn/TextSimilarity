@@ -90,9 +90,9 @@ class Preprocess():
             f.write(result)
 
 # %%
-Preprocess.generate_cls_dict('./dataset/std_data', './dataset/cls_dict')
+# Preprocess.generate_cls_dict('./dataset/std_data', './dataset/cls_dict')
 
-# %%
-Preprocess.split_train('./dataset/computed/cls_data', 'cls_train', 'cls_test', 248000)
+# # %%
+# Preprocess.split_train('./dataset/computed/cls_data', 'cls_train', 'cls_test', 248000)
 
 # %%

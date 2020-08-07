@@ -25,19 +25,22 @@ dataiter_eval = DataLoader(myData_eval, batch_size=120)
 # %%
 config = BertConfig.from_json_file('./dataset/bert_config.json')
 config.num_labels = len(myDataset.cls_label_2_id)
-model = BertForSequenceClassification.from_pretrained('./model/bert_pre58_1/pytorch_model.bin', config=config)
+model = BertForSequenceClassification.from_pretrained('./model/bert_pre58_3/pytorch_model.bin', config=config)
 
 model.cuda()
 device = torch.device("cuda:2" if torch.cuda.is_available() else "cpu")
 model = torch.nn.DataParallel(model, device_ids=[2, 3]).cuda()
 model.to(device)
 
+model_dict = torch.load("./model/bert_cls/bert_58_cls2.pth").module.state_dict()
+model.module.load_state_dict(model_dict)
+
 # %%
-optimizer = optim.Adam(model.parameters(), lr=1e-4, weight_decay=0.)
+optimizer = optim.Adam(model.parameters(), lr=1e-5, weight_decay=0.)
 
 losses = []
 
-save_offset = 0
+save_offset = 2
 num_epochs = 30
 for epoch in range(num_epochs):
     train_count = 0
@@ -47,9 +50,9 @@ for epoch in range(num_epochs):
     for sentences, attn_masks, labels in train_iter:
         model.train()
         if torch.cuda.is_available():
-            sentences = Variable(sentences.cuda())
-            attn_masks = Variable(attn_masks.cuda())
-            labels = Variable(labels.cuda())
+            sentences = Variable(sentences.cuda(2))
+            attn_masks = Variable(attn_masks.cuda(2))
+            labels = Variable(labels.cuda(2))
         else:
             sentences = Variable(sentences)
             attn_masks = Variable(attn_masks)
@@ -85,9 +88,9 @@ for epoch in range(num_epochs):
         for sentences, attn_masks, labels in eval_iter:
             model.eval()
             if torch.cuda.is_available():
-                sentences = Variable(sentences.cuda())
-                attn_masks = Variable(attn_masks.cuda())
-                labels = Variable(labels.cuda())
+                sentences = Variable(sentences.cuda(2))
+                attn_masks = Variable(attn_masks.cuda(2))
+                labels = Variable(labels.cuda(2))
             else:
                 sentences = Variable(sentences)
                 attn_masks = Variable(attn_masks)

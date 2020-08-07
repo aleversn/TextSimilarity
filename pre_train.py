@@ -32,7 +32,7 @@ class RandomPreTrainDataset(PreTrainDataset):
 
 # %%
 config = BertConfig.from_json_file('./dataset/bert_config.json')
-model = BertForMaskedLM.from_pretrained('./model/bert_pre58_1/pytorch_model.bin', config=config)
+model = BertForMaskedLM.from_pretrained('./model/bert_pre58_3/pytorch_model.bin', config=config)
 
 # device = torch.device("cuda:2" if torch.cuda.is_available() else "cpu")
 # model = torch.nn.DataParallel(model, device_ids=[2, 3]).cuda()
