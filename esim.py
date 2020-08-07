@@ -198,8 +198,8 @@ for epoch in range(num_epochs):
         train_count += 1
         train_iter.set_description('Epoch: {}/{} Train'.format(epoch + 1, num_epochs))
         train_iter.set_postfix(train_loss=train_loss / train_count, train_acc=train_acc / train_count)
-    torch.save(esim, './model/esim_x/esim_sim_{}.pth'.format(epoch + 1 + save_offset))
-    WriteSDC('log_esim_x_20200803.log', 'epoch: {} train_acc: {} loss: {}\n'.format(epoch + 1 + save_offset, train_acc / train_count, train_loss / train_count))
+    torch.save(esim, './model/esim/esim_sim_{}.pth'.format(epoch + 1 + save_offset))
+    WriteSDC('log_esim_20200803.log', 'epoch: {} train_acc: {} loss: {}\n'.format(epoch + 1 + save_offset, train_acc / train_count, train_loss / train_count))
     
     if epoch == 0 or epoch % 3 != 0:
         continue
