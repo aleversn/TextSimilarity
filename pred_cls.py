@@ -29,7 +29,7 @@ device = torch.device("cuda:2" if torch.cuda.is_available() else "cpu")
 model = torch.nn.DataParallel(model, device_ids=[2, 3]).cuda()
 model.to(device)
 
-model_dict = torch.load("./model/bert_cls/bert_58_cls8.pth").module.state_dict()
+model_dict = torch.load("./model/bert_cls/bert_58_cls918.pth").module.state_dict()
 model.module.load_state_dict(model_dict)
 
 # %%
@@ -53,7 +53,7 @@ with torch.no_grad():
         result = ''
         for idx, item in enumerate(sents_):
             result += '{}\t{}\t{}\t{}\n'.format(0, ext_ids[idx], myDataset.cls_id_2_label[pred[idx].data.item()], item)
-        with open('./dataset/computed/test_with_label', encoding='utf-8', mode='a+') as f:
+        with open('./dataset/computed/test_with_label_918', encoding='utf-8', mode='a+') as f:
             f.write(result)
             
 

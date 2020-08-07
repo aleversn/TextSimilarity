@@ -16,31 +16,31 @@ from transformers import BertModel, BertConfig, BertTokenizer, BertForSequenceCl
 # %%
 tokenizer = BertTokenizer.from_pretrained('./dataset/vocab')
 
-myDataset = ClsDataset(tokenizer, './dataset/computed/cls_train', './dataset/cls_dict', 100)
+myDataset = ClsDataset(tokenizer, './dataset/101/cls_train', './dataset/cls_dict', 100)
 dataiter = DataLoader(myDataset, batch_size=120)
 
-myData_eval = ClsDataset(tokenizer, './dataset/computed/cls_test', './dataset/cls_dict', 100)
+myData_eval = ClsDataset(tokenizer, './dataset/101/cls_test', './dataset/cls_dict', 100)
 dataiter_eval = DataLoader(myData_eval, batch_size=120)
 
 # %%
 config = BertConfig.from_json_file('./dataset/bert_config.json')
 config.num_labels = len(myDataset.cls_label_2_id)
-model = BertForSequenceClassification.from_pretrained('./model/bert_pre58_3/pytorch_model.bin', config=config)
+model = BertForSequenceClassification.from_pretrained('./model/bert_pre58_4/pytorch_model.bin', config=config)
 
 model.cuda()
 device = torch.device("cuda:2" if torch.cuda.is_available() else "cpu")
 model = torch.nn.DataParallel(model, device_ids=[2, 3]).cuda()
 model.to(device)
 
-model_dict = torch.load("./model/bert_cls/bert_58_cls2.pth").module.state_dict()
-model.module.load_state_dict(model_dict)
+# model_dict = torch.load("./model/bert_cls/bert_58_cls2.pth").module.state_dict()
+# model.module.load_state_dict(model_dict)
 
 # %%
 optimizer = optim.Adam(model.parameters(), lr=1e-5, weight_decay=0.)
 
 losses = []
 
-save_offset = 2
+save_offset = 900
 num_epochs = 30
 for epoch in range(num_epochs):
     train_count = 0
