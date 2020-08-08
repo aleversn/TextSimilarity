@@ -180,7 +180,44 @@ def pred_bert(model, eval_list, myData_eval):
         f.write('ext_id,std_id')
         for idx, item in enumerate(eval_list):
             f.write('\n{},{}'.format(item[1], result_std_id[idx]))
-            
+
+def eval_esim_bert(esim, model, eval_list, myData_eval, epoch, save_offset, log_name='log_eval_esim_bert.log'):
+    with torch.no_grad():
+        esim.eval()
+        eval_correct_num = 0
+        eval_list_iter = tqdm(eval_list)
+        for idx, item in enumerate(eval_list_iter):
+            cur_eval_result_scores = torch.tensor([])
+            cur_eval_result_stdid = torch.LongTensor([])
+            myData_eval.make_data(item)
+            dataiter_eval = DataLoader(myData_eval, batch_size=120)
+            for sentences, cur_std_id in dataiter_eval:
+                if torch.cuda.is_available():
+                    sentences = Variable(sentences.cuda())
+                    cur_std_id = Variable(cur_std_id.cuda())
+                    cur_eval_result_scores = Variable(cur_eval_result_scores.cuda())
+                    cur_eval_result_stdid = Variable(cur_eval_result_stdid.cuda())
+                else:
+                    sentences = Variable(sentences)
+                    cur_std_id = Variable(cur_std_id)
+                
+                sent1, sent2 = sentences[:, 0, :], sentences[:, 1, :]
+                mask1, mask2 = sent1.eq(0), sent2.eq(0)
+
+                em1 = model(input_ids=sent1, attention_mask=sent1.gt(0))[0]
+                em2 = model(input_ids=sent2, attention_mask=sent2.gt(0))[0]
+                out = esim([em1, em2], [mask1, mask2])
+                pred_scores = out[:,1]
+                cur_eval_result_scores = torch.cat((cur_eval_result_scores, pred_scores))
+                cur_eval_result_stdid = torch.cat((cur_eval_result_stdid,cur_std_id))
+            eval_list_iter.set_description('{}/{}'.format(idx + 1, len(eval_list)))
+            eval_list_iter.set_postfix(correct_num=eval_correct_num, eval_acc=eval_correct_num / (idx + 1))
+            max_item_index = cur_eval_result_scores.sort(descending=True)[1][0].data.item()
+            max_item_id = cur_std_id[max_item_index].data.item()
+            if max_item_id == int(item[0]):
+                eval_correct_num += 1
+        print('Eval_acc: {}\n'.format(eval_correct_num / len(eval_list)))
+        WriteSDC(log_name, 'epoch: {} eval_num: {} eval_acc: {}\n'.format(epoch + 1 + save_offset, eval_correct_num, eval_correct_num / len(eval_list)))
 
 
 # %%
