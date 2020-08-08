@@ -219,6 +219,108 @@ def eval_esim_bert(esim, model, eval_list, myData_eval, epoch, save_offset, log_
         print('Eval_acc: {}\n'.format(eval_correct_num / len(eval_list)))
         WriteSDC(log_name, 'epoch: {} eval_num: {} eval_acc: {}\n'.format(epoch + 1 + save_offset, eval_correct_num, eval_correct_num / len(eval_list)))
 
+def eval_esimx2(esim, eval_list, myData_eval, epoch, save_offset, log_name='log_eval_20200803.log'):
+    with torch.no_grad():
+        esim.eval()
+        eval_correct_num = 0
+        eval_list_iter = tqdm(eval_list)
+        for idx, item in enumerate(eval_list_iter):
+            cur_eval_result_scores = torch.tensor([])
+            cur_eval_result_stdid = torch.LongTensor([])
+            myData_eval.make_data(item)
+            dataiter_eval = DataLoader(myData_eval, batch_size=1000)
+            for sentences, cur_std_id in dataiter_eval:
+                if torch.cuda.is_available():
+                    sentences = Variable(sentences.cuda())
+                    cur_std_id = Variable(cur_std_id.cuda())
+                    cur_eval_result_scores = Variable(cur_eval_result_scores.cuda())
+                    cur_eval_result_stdid = Variable(cur_eval_result_stdid.cuda())
+                else:
+                    sentences = Variable(sentences)
+                    cur_std_id = Variable(cur_std_id)
+                out_1 = esim(sentences)
+                out_2 = esim(sentences, True)
+                pred_scores = (out_1[:,1] + out_2[:,1]) / 2
+                cur_eval_result_scores = torch.cat((cur_eval_result_scores, pred_scores))
+                cur_eval_result_stdid = torch.cat((cur_eval_result_stdid,cur_std_id))
+            eval_list_iter.set_description('{}/{}'.format(idx + 1, len(eval_list)))
+            eval_list_iter.set_postfix(correct_num=eval_correct_num, eval_acc=eval_correct_num / (idx + 1))
+            max_item_index = cur_eval_result_scores.sort(descending=True)[1][0].data.item()
+            max_item_id = cur_eval_result_stdid[max_item_index].data.item()
+            if max_item_id == int(item[0]):
+                eval_correct_num += 1
+        print('Eval_acc: {}\n'.format(eval_correct_num / len(eval_list)))
+        WriteSDC(log_name, 'epoch: {} eval_num: {} eval_acc: {}\n'.format(epoch + 1 + save_offset, eval_correct_num, eval_correct_num / len(eval_list)))
+
+def eval_esim_s2(esim1, esim2, eval_list, myData_eval, epoch, save_offset, log_name='log_eval_20200803.log'):
+    with torch.no_grad():
+        esim1.eval()
+        esim2.eval()
+        eval_correct_num = 0
+        eval_list_iter = tqdm(eval_list)
+        for idx, item in enumerate(eval_list_iter):
+            cur_eval_result_scores = torch.tensor([])
+            cur_eval_result_stdid = torch.LongTensor([])
+            myData_eval.make_data(item)
+            dataiter_eval = DataLoader(myData_eval, batch_size=1000)
+            for sentences, cur_std_id in dataiter_eval:
+                if torch.cuda.is_available():
+                    sentences = Variable(sentences.cuda())
+                    cur_std_id = Variable(cur_std_id.cuda())
+                    cur_eval_result_scores = Variable(cur_eval_result_scores.cuda())
+                    cur_eval_result_stdid = Variable(cur_eval_result_stdid.cuda())
+                else:
+                    sentences = Variable(sentences)
+                    cur_std_id = Variable(cur_std_id)
+                out_1 = esim1(sentences)
+                out_2 = esim2(sentences)
+                pred_scores = (out_1[:,1] + out_2[:,1]) / 2
+                cur_eval_result_scores = torch.cat((cur_eval_result_scores, pred_scores))
+                cur_eval_result_stdid = torch.cat((cur_eval_result_stdid,cur_std_id))
+            eval_list_iter.set_description('{}/{}'.format(idx + 1, len(eval_list)))
+            eval_list_iter.set_postfix(correct_num=eval_correct_num, eval_acc=eval_correct_num / (idx + 1))
+            max_item_index = cur_eval_result_scores.sort(descending=True)[1][0].data.item()
+            max_item_id = cur_eval_result_stdid[max_item_index].data.item()
+            if max_item_id == int(item[0]):
+                eval_correct_num += 1
+        print('Eval_acc: {}\n'.format(eval_correct_num / len(eval_list)))
+        WriteSDC(log_name, 'epoch: {} eval_num: {} eval_acc: {}\n'.format(epoch + 1 + save_offset, eval_correct_num, eval_correct_num / len(eval_list)))
+
+def pred_s2(esim1, esim2, eval_list, myData_eval):
+    result_std_id = []
+    with torch.no_grad():
+        esim1.eval()
+        esim2.eval()
+        eval_correct_num = 0
+        eval_list_iter = tqdm(eval_list)
+        for idx, item in enumerate(eval_list_iter):
+            cur_eval_result_scores = torch.tensor([])
+            cur_eval_result_stdid = torch.LongTensor([])
+            myData_eval.make_data(item)
+            dataiter_eval = DataLoader(myData_eval, batch_size=1000)
+            for sentences, cur_std_id in dataiter_eval:
+                if torch.cuda.is_available():
+                    sentences = Variable(sentences.cuda())
+                    cur_std_id = Variable(cur_std_id.cuda())
+                    cur_eval_result_scores = Variable(cur_eval_result_scores.cuda())
+                    cur_eval_result_stdid = Variable(cur_eval_result_stdid.cuda())
+                else:
+                    sentences = Variable(sentences)
+                    cur_std_id = Variable(cur_std_id)
+                out1 = esim1(sentences)
+                out2 = esim2(sentences)
+                pred_scores = (out1[:,1] + out2[:,1]) / 2
+                cur_eval_result_scores = torch.cat((cur_eval_result_scores, pred_scores))
+                cur_eval_result_stdid = torch.cat((cur_eval_result_stdid,cur_std_id))
+            eval_list_iter.set_description('{}/{}'.format(idx + 1, len(eval_list)))
+            eval_list_iter.set_postfix(correct_num=eval_correct_num, eval_acc=eval_correct_num / (idx + 1))
+            max_item_index = cur_eval_result_scores.sort(descending=True)[1][0].data.item()
+            max_item_id = cur_eval_result_stdid[max_item_index].data.item()
+            result_std_id.append(max_item_id)
+    with open('result_x2.csv', encoding='utf-8', mode='a+') as f:
+        f.write('ext_id,std_id')
+        for idx, item in enumerate(eval_list):
+            f.write('\n{},{}'.format(item[1], result_std_id[idx]))
 
 # %%
 max_length_of_train('./dataset/computed/final_train')

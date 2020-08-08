@@ -29,11 +29,11 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 model = torch.nn.DataParallel(model, device_ids=[0, 1, 2, 3]).cuda()
 model.to(device)
 
-model_dict = torch.load("./model/bert_sim/bert_sim_2.pth").module.state_dict()
+EVAL_EPOCH = 928
+model_dict = torch.load("./model/bert_sim/bert_sim_{}.pth".format(EVAL_EPOCH)).module.state_dict()
 model.module.load_state_dict(model_dict)
 
 # %%
-EVAL_EPOCH = 31
 pred_bert(model, eval_list, myData_eval)
 
 # %%
