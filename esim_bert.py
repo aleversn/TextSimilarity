@@ -231,13 +231,13 @@ for epoch in range(num_epochs):
                                train_count, train_acc=train_acc / train_count)
     os.makedirs('./model/esim_bert/esim_bert{}'.format(epoch + 1 + save_offset))
     torch.save(
-        esim, './model/esim_bert/esim_bert{}/esim_{}.pth'.format(epoch + 1 + save_offset))
+        esim, './model/esim_bert/esim_bert{}/esim_{}.pth'.format(epoch + 1 + save_offset, epoch + 1 + save_offset))
     torch.save(
-        model, './model/esim_bert/esim_bert{}/bert_{}.pth'.format(epoch + 1 + save_offset))
+        model, './model/esim_bert/esim_bert{}/bert_{}.pth'.format(epoch + 1 + save_offset, epoch + 1 + save_offset))
     WriteSDC('log_esim_bert.log', 'epoch: {} train_acc: {} loss: {}\n'.format(
         epoch + 1 + save_offset, train_acc / train_count, train_loss / train_count))
 
-    if epoch == 0 or epoch % 3 != 0:
+    if epoch % 3 != 0:
         continue
     # %%
     eval_esim_bert(esim, model, eval_list, myData_eval, epoch, save_offset)
