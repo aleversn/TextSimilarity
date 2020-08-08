@@ -1,4 +1,5 @@
 # %%
+import os
 import sys
 import random
 import numpy as np
@@ -16,7 +17,7 @@ from transformers import BertModel, BertConfig, BertTokenizer, BertForSequenceCl
 tokenizer = BertTokenizer.from_pretrained('./dataset/vocab')
 
 myDataset = SimDataset(tokenizer, './dataset/101/final_train', 100)
-dataiter = DataLoader(myDataset, batch_size=120)
+dataiter = DataLoader(myDataset, batch_size=150)
 
 eval_list = load_sim_dev('./dataset/101/c_dev_with_label')
 myData_eval = EvalSimWithLabelDataset(tokenizer, './dataset/std_data', 100)
@@ -55,7 +56,7 @@ class ESIM(nn.Module):
         self.num_word = 49807
         self.dropout = 0.5
         self.hidden_size = 300
-        self.embeds_dim = 300
+        self.embeds_dim = 768
         self.linear_size = 200
 
         self.embeds = nn.Embedding(self.num_word, self.embeds_dim)
@@ -228,14 +229,17 @@ for epoch in range(num_epochs):
             'Epoch: {}/{} Train'.format(epoch + 1, num_epochs))
         train_iter.set_postfix(train_loss=train_loss /
                                train_count, train_acc=train_acc / train_count)
+    os.makedirs('./model/esim_bert/esim_bert{}'.format(epoch + 1 + save_offset))
     torch.save(
-        esim, './model/esim_bert/esim_sim_{}.pth'.format(epoch + 1 + save_offset))
+        esim, './model/esim_bert/esim_bert{}/esim_{}.pth'.format(epoch + 1 + save_offset))
+    torch.save(
+        model, './model/esim_bert/esim_bert{}/bert_{}.pth'.format(epoch + 1 + save_offset))
     WriteSDC('log_esim_bert.log', 'epoch: {} train_acc: {} loss: {}\n'.format(
         epoch + 1 + save_offset, train_acc / train_count, train_loss / train_count))
 
     if epoch == 0 or epoch % 3 != 0:
         continue
-
+    # %%
     eval_esim_bert(esim, model, eval_list, myData_eval, epoch, save_offset)
 
 # %%

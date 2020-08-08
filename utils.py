@@ -65,7 +65,7 @@ def eval(esim, eval_list, myData_eval, epoch, save_offset, log_name='log_eval_20
             eval_list_iter.set_description('{}/{}'.format(idx + 1, len(eval_list)))
             eval_list_iter.set_postfix(correct_num=eval_correct_num, eval_acc=eval_correct_num / (idx + 1))
             max_item_index = cur_eval_result_scores.sort(descending=True)[1][0].data.item()
-            max_item_id = cur_std_id[max_item_index].data.item()
+            max_item_id = cur_eval_result_stdid[max_item_index].data.item()
             if max_item_id == int(item[0]):
                 eval_correct_num += 1
         print('Eval_acc: {}\n'.format(eval_correct_num / len(eval_list)))
@@ -213,7 +213,7 @@ def eval_esim_bert(esim, model, eval_list, myData_eval, epoch, save_offset, log_
             eval_list_iter.set_description('{}/{}'.format(idx + 1, len(eval_list)))
             eval_list_iter.set_postfix(correct_num=eval_correct_num, eval_acc=eval_correct_num / (idx + 1))
             max_item_index = cur_eval_result_scores.sort(descending=True)[1][0].data.item()
-            max_item_id = cur_std_id[max_item_index].data.item()
+            max_item_id = cur_eval_result_stdid[max_item_index].data.item()
             if max_item_id == int(item[0]):
                 eval_correct_num += 1
         print('Eval_acc: {}\n'.format(eval_correct_num / len(eval_list)))
