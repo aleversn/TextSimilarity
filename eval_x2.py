@@ -15,7 +15,7 @@ from transformers import BertModel, BertConfig, BertTokenizer, BertForSequenceCl
 # %%
 tokenizer = BertTokenizer.from_pretrained('./dataset/vocab')
 
-eval_list = load_sim_dev('./dataset/computed/c_dev_with_label')
+eval_list = load_sim_dev('./dataset/101/c_dev_with_label')
 myData_eval = EvalSimWithLabelDataset(tokenizer, './dataset/std_data', 200)
 
 # %%

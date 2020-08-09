@@ -75,6 +75,31 @@ class Preprocess():
         return len(label_dict)
     
     '''
+    把c_train处理为配对数据集final_train
+    '''
+    @staticmethod
+    def process_sim_data_x(std_name, file_name, save_name):
+        label_dict, std_dict, _ = Preprocess.load_std(std_name)
+        result = ''
+        with open(file_name, encoding='utf-8') as f:
+            train_list = f.read().split('\n')
+        for line in train_list:
+            std_id, _, sentence = line.strip().split('\t')
+            label_id = std_dict[std_id][0]
+            result += '{}\t{}\t{}\n'.format(sentence, std_dict[std_id][2], 1)
+            sample_arr = random.sample(label_dict[label_id], len(label_dict[label_id]))
+            count = 0
+            for item in sample_arr:
+                if std_id != item[0]:
+                    count += 1
+                    result += '{}\t{}\t{}\n'.format(sentence, item[1], 0)
+                    if count > 2:
+                        break
+        with open(save_name, encoding='utf-8', mode='w+') as f:
+            f.write(result)
+        return len(label_dict)
+    
+    '''
     处理验证集为带label的验证集
     保存格式 std_id ext_id label_id sentence
     '''

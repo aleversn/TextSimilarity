@@ -11,6 +11,7 @@ class SimDataset(Dataset):
         self.tokenizer = tokenizer
         self.padding_length = padding_length
         self.ori_list = self.load_train(file_name)
+        random.shuffle(self.ori_list)
     
     def __getitem__(self, idx):
         sent_1, sent_2, label = self.ori_list[idx].strip().split('\t')
@@ -131,6 +132,23 @@ class BertEvalSimWithLabelDataset(BertEvalSimDataset):
 
         for item in self.label_dict[self.label_id]:
             self.eval_list.append([self.eval_sentence, item[1], item[0]])
+
+class EnsembleEvalSimWithLabelDataset(BertEvalSimWithLabelDataset):
+
+    def __getitem__(self, idx):
+        sent_1, sent_2, cur_std_id = self.eval_list[idx]
+        sentence = '{} [SEP] {}'.format(sent_1, sent_2)
+        T = self.tokenizer(sentence, add_special_tokens=True, max_length=self.padding_length, padding='max_length', truncation=True)
+        
+        sentence = torch.tensor(T['input_ids'])
+        attn_mask = torch.tensor(T['attention_mask'])
+        token_type_id = torch.tensor(T['token_type_ids'])
+
+        sent_1 = self.tokenizer(sent_1, add_special_tokens=False, max_length=self.padding_length, padding='max_length', truncation=True)['input_ids']
+        sent_2 = self.tokenizer(sent_2, add_special_tokens=False, max_length=self.padding_length, padding='max_length', truncation=True)['input_ids']
+        sentence_esim = torch.tensor([sent_1, sent_2])
+
+        return sentence, attn_mask, token_type_id, sentence_esim, torch.tensor(int(cur_std_id))
 
 class ClsDataset(Dataset):
 
