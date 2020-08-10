@@ -38,7 +38,8 @@ class SupremePredClsDataset(SupremeClsDataset):
         std_id = 0
         return sentence, attn_mask, std_id, exit_id, label
 
-LABEL_ID = '1'
+LABEL_ID = '12'
+EPOCH_NUM = '16'
     
 tokenizer = BertTokenizer.from_pretrained('./dataset/vocab')
 
@@ -55,7 +56,7 @@ device = torch.device("cuda:2" if torch.cuda.is_available() else "cpu")
 model = torch.nn.DataParallel(model, device_ids=[2, 3]).cuda()
 model.to(device)
 
-model_dict = torch.load("./model/supreme/l{}/bert_supreme_12.pth".format(LABEL_ID)).module.state_dict()
+model_dict = torch.load("./model/supreme/l{}/bert_supreme_{}.pth".format(LABEL_ID, EPOCH_NUM)).module.state_dict()
 model.module.load_state_dict(model_dict)
 
 # %%

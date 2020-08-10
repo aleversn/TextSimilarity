@@ -215,13 +215,14 @@ class Preprocess():
 # Preprocess.process_sim_data('./dataset/std_data', './dataset/101/c_train', './dataset/101/final_train')
 
 # %%
-# Preprocess.generate_cls_train_std_dict('./dataset/std_data', '1', './dataset/supreme/l1/std_dict')
+# L = 1
+# Preprocess.generate_cls_train_std_dict('./dataset/std_data', '{}'.format(L), './dataset/supreme/l{}/std_dict'.format(L))
 
 # %%
-# Preprocess.generate_cls_train_by_label('./dataset/101/c_train_with_label', '1', './dataset/supreme/l1/s_train')
-# Preprocess.generate_cls_train_by_label('./dataset/101/c_dev_with_label', '1', './dataset/supreme/l1/s_dev')
+# Preprocess.generate_cls_train_by_label('./dataset/101/c_train_with_label', '{}'.format(L), './dataset/supreme/l{}/s_train'.format(L))
+# Preprocess.generate_cls_train_by_label('./dataset/101/c_dev_with_label', '{}'.format(L), './dataset/supreme/l{}/s_dev'.format(L))
 
 # %%
-# Preprocess.combineSupreme('./result/result_x2.csv', ['./supreme/l1'], './result.csv')
+# Preprocess.combineSupreme('./result/result_x2.csv', ['./supreme/l1', './supreme/l3', './supreme/l4', './supreme/l7', './supreme/l10', './supreme/l12'], './result.csv')
 
 # %%

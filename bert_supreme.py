@@ -15,7 +15,7 @@ from trainDataloader import SupremeClsDataset
 from transformers import BertModel, BertConfig, BertTokenizer, BertForSequenceClassification
 
 # %%
-LABEL_ID = '12'
+LABEL_ID = '1'
 
 tokenizer = BertTokenizer.from_pretrained('./dataset/vocab')
 
@@ -35,9 +35,9 @@ device = torch.device("cuda:2" if torch.cuda.is_available() else "cpu")
 model = torch.nn.DataParallel(model, device_ids=[2, 3]).cuda()
 model.to(device)
 
-save_offset = 0
-# model_dict = torch.load("./model/supreme/l{}/bert_supreme_{}.pth".format(LABEL_ID, save_offset)).module.state_dict()
-# model.module.load_state_dict(model_dict)
+save_offset = 16
+model_dict = torch.load("./model/supreme/l{}/bert_supreme_{}.pth".format(LABEL_ID, save_offset)).module.state_dict()
+model.module.load_state_dict(model_dict)
 
 # %%
 optimizer = optim.Adam(model.parameters(), lr=5e-5, weight_decay=0.)
