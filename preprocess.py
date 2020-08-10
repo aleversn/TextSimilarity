@@ -156,8 +156,10 @@ class Preprocess():
 # # %%
 # Preprocess.process_dev_data_with_label('./dataset/std_data', './dataset/computed/c_dev', './dataset/computed/c_dev_with_label')
 
-# # %%
-# label_dict, std_dict, std_list = Preprocess.load_std('./dataset/std_data')
+# %%
+label_dict, std_dict, std_list = Preprocess.load_std('./dataset/std_data')
+for item in label_dict:
+    print(item, len(label_dict[item]))
 # %%
 # Preprocess.split_train('./dataset/train_data', '101_train', '101_test', 232355)
 

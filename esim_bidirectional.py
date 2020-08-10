@@ -180,13 +180,13 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 if torch.cuda.device_count() > 1:
     esim = nn.DataParallel(esim, device_ids=[0, 1, 2, 3])
     esim.to(device)
-# model_dict = torch.load("./model/esim_x/esim_sim_2.pth").module.state_dict()
-# esim.module.load_state_dict(model_dict)
+model_dict = torch.load("./model/esim/esim_sim_1019.pth").module.state_dict()
+esim.module.load_state_dict(model_dict)
 
 criterion = nn.BCELoss()
 optimizer = torch.optim.Adam(esim.parameters(), lr=1e-3)
 
-save_offset = 1000
+save_offset = 1019
 num_epochs = 120
 for epoch in range(num_epochs):
     
