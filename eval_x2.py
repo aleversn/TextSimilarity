@@ -16,7 +16,7 @@ from transformers import BertModel, BertConfig, BertTokenizer, BertForSequenceCl
 tokenizer = BertTokenizer.from_pretrained('./dataset/vocab')
 
 eval_list = load_sim_dev('./dataset/101/c_dev_with_label')
-myData_eval = EvalSimWithLabelDataset(tokenizer, './dataset/std_data', 200)
+myData_eval = EvalSimWithLabelDataset(tokenizer, './dataset/std_data', 100)
 
 # %%
 class SelfAttention(nn.Module):
@@ -151,7 +151,7 @@ class ESIM(nn.Module):
         return similarity
 
 # %%
-EVAL_EPOCH = 931
+EVAL_EPOCH = 1016
 esim1 = ESIM()
 esim2 = ESIM()
 if torch.cuda.is_available():
@@ -165,7 +165,7 @@ if torch.cuda.device_count() > 1:
     esim2.to(device)
 model_dict = torch.load("./model/esim/esim_sim_{}.pth".format(EVAL_EPOCH)).module.state_dict()
 esim1.module.load_state_dict(model_dict)
-model_dict = torch.load("./model/esim/esim_sim_{}.pth".format(928)).module.state_dict()
+model_dict = torch.load("./model/esim/esim_sim_{}.pth".format(1019)).module.state_dict()
 esim2.module.load_state_dict(model_dict)
 
 # eval(esim, eval_list, myData_eval, EVAL_EPOCH, 0)
