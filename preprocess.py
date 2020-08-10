@@ -147,6 +147,56 @@ class Preprocess():
         with open(save_name, encoding='utf-8', mode='w+') as f:
             f.write(result)
 
+    @staticmethod
+    def generate_cls_train_std_dict(std_name, label_id, save_name):
+        label_dict, _, _ = Preprocess.load_std(std_name)
+        result = ''
+        with open(save_name, encoding='utf-8', mode='w+') as f:
+            label_list = label_dict[label_id]
+            for item in label_list:
+                if result != '':
+                    result += '\n'
+                result += item[0]
+            f.write(result)
+    
+    '''
+    生成指定label的带label数据集
+    '''
+    @staticmethod
+    def generate_cls_train_by_label(train_with_label, label_id, save_name):
+        with open(train_with_label, encoding='utf-8') as f:
+            train_list = f.read().split('\n')
+        for i in range(len(train_list) - 1, -1, -1):
+            std_id, ext_id, cur_label_id, sentence = train_list[i].strip().split('\t')
+            if int(cur_label_id) != int(label_id):
+                train_list.pop(i)
+        result = ''
+        with open(save_name, encoding='utf-8', mode='w+') as f:
+            for item in train_list:
+                if result != '':
+                    result += '\n'
+                result += item
+            f.write(result)
+    
+    @staticmethod
+    def combineSupreme(ori_result, supreme_list, save_name):
+        with open(ori_result, encoding='utf-8') as f:
+            ori_list = f.read().split('\n')
+            ori_list = ori_list[1:]
+        for file_name in supreme_list:
+            with open(file_name, encoding='utf-8') as f:
+                cur_list = f.read().split('\n')
+            for line in cur_list:
+                ext_id, std_id = line.strip().split(',')
+                ori_list[int(ext_id)] = line
+        result = 'ext_id,std_id'
+        with open(save_name, encoding='utf-8', mode='w+') as f:
+            for line in ori_list:
+                result += '\n'
+                result += line
+            f.write(result)
+            
+
 # %%
 # Preprocess.generate_cls_dict('./dataset/std_data', './dataset/cls_dict')
 
@@ -163,5 +213,15 @@ class Preprocess():
 
 # %%
 # Preprocess.process_sim_data('./dataset/std_data', './dataset/101/c_train', './dataset/101/final_train')
+
+# %%
+# Preprocess.generate_cls_train_std_dict('./dataset/std_data', '1', './dataset/supreme/l1/std_dict')
+
+# %%
+# Preprocess.generate_cls_train_by_label('./dataset/101/c_train_with_label', '1', './dataset/supreme/l1/s_train')
+# Preprocess.generate_cls_train_by_label('./dataset/101/c_dev_with_label', '1', './dataset/supreme/l1/s_dev')
+
+# %%
+# Preprocess.combineSupreme('./result/result_x2.csv', ['./supreme/l1'], './result.csv')
 
 # %%

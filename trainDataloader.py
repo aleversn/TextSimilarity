@@ -191,4 +191,37 @@ class ClsPredDataset(ClsDataset):
         sentence = torch.tensor(T['input_ids'])
         attn_mask = torch.tensor(T['attention_mask'])
         return sentence, attn_mask, sent_, ext_id
+
+class SupremeClsDataset(Dataset):
+
+    def __init__(self, tokenizer, file_name, stdid_vocab, padding_length=128):
+        self.tokenizer = tokenizer
+        self.padding_length = padding_length
+        self.data_init(file_name)
+        self.cls_vocab_init(stdid_vocab)
+    
+    def cls_vocab_init(self, file_name):
+        with open(file_name, encoding='utf-8', mode='r') as f:
+            ori_list = f.read().split('\n')
+        self.cls_label_2_id = {}
+        self.cls_id_2_label = {}
+        for idx, item in enumerate(ori_list):
+            item = item.strip()
+            self.cls_label_2_id[item] = idx
+            self.cls_id_2_label[idx] = item
+    
+    def data_init(self, file_name):
+        with open(file_name, encoding='utf-8') as f:
+            self.ori_list = f.read().split('\n')
+    
+    def __getitem__(self, idx):
+        std_id, exit_id, label, sentence = self.ori_list[idx].strip().split('\t')
+        T = self.tokenizer(sentence, add_special_tokens=True, max_length=self.padding_length, padding='max_length', truncation=True)
+        sentence = torch.tensor(T['input_ids'])
+        attn_mask = torch.tensor(T['attention_mask'])
+        std_id = torch.tensor(self.cls_label_2_id[std_id])
+        return sentence, attn_mask, std_id, exit_id, label
+    
+    def __len__ (self):
+        return len(self.ori_list)
         
