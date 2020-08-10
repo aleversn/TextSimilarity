@@ -26,20 +26,15 @@ dataiter_eval = DataLoader(myData_eval, batch_size=120)
 config = BertConfig.from_json_file('./dataset/bert_config.json')
 config.num_labels = len(myDataset.cls_label_2_id)
 model = BertForSequenceClassification(config=config)
-model_1 = BertForSequenceClassification(config=config)
 
 model.cuda()
-model_1.cuda()
 device = torch.device("cuda:2" if torch.cuda.is_available() else "cpu")
 model = torch.nn.DataParallel(model, device_ids=[2, 3]).cuda()
-model_1 = torch.nn.DataParallel(model, device_ids=[2, 3]).cuda()
 model.to(device)
-model_1.to(device)
 
-model_dict = torch.load("./model/bert_cls/bert_58_cls8.pth").module.state_dict()
+model_dict = torch.load("./model/bert_cls/bert_58_cls980.pth").module.state_dict()
 model.module.load_state_dict(model_dict)
-model_dict_2 = torch.load("./model/bert_cls/bert_58_cls13.pth").module.state_dict()
-model_1.module.load_state_dict(model_dict_2)
+model_dict_2 = torch.load("./model/bert_cls/bert_58_cls978.pth").module.state_dict()
 
 # %%
 
@@ -50,7 +45,6 @@ with torch.no_grad():
     eval_iter = tqdm(dataiter_eval)
     for sentences, attn_masks, labels in eval_iter:
         model.eval()
-        model_1.eval()
         if torch.cuda.is_available():
             sentences = Variable(sentences.cuda(2))
             attn_masks = Variable(attn_masks.cuda(2))
@@ -63,7 +57,9 @@ with torch.no_grad():
         outputs = model(sentences, attention_mask=attn_masks, labels=labels)
         loss, logits = outputs[:2]
 
-        outputs_2 = model_1(sentences, attention_mask=attn_masks, labels=labels)
+        model.module.load_state_dict(model_dict_2)
+        model.eval()
+        outputs_2 = model(sentences, attention_mask=attn_masks, labels=labels)
         loss_2, logits_2 = outputs_2[:2]
         
         loss = loss.mean()
