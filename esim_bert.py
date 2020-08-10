@@ -17,9 +17,9 @@ from transformers import BertModel, BertConfig, BertTokenizer, BertForSequenceCl
 tokenizer = BertTokenizer.from_pretrained('./dataset/vocab')
 
 myDataset = SimDataset(tokenizer, './dataset/101/final_train', 100)
-dataiter = DataLoader(myDataset, batch_size=150)
+dataiter = DataLoader(myDataset, batch_size=100)
 
-eval_list = load_sim_dev('./dataset/101/c_dev_with_label')
+eval_list = load_sim_dev('./dataset/computed/c_dev_with_label')
 myData_eval = EvalSimWithLabelDataset(tokenizer, './dataset/std_data', 100)
 
 # %%
@@ -180,14 +180,17 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 model = torch.nn.DataParallel(model, device_ids=[0, 1, 2, 3]).cuda()
 model.to(device)
 
-# model_dict = torch.load("./model/esim_x/esim_sim_2.pth").module.state_dict()
-# esim.module.load_state_dict(model_dict)
+model_dict = torch.load("./model/esim_bert/esim_bert2/esim_2.pth").module.state_dict()
+esim.module.load_state_dict(model_dict)
+model_dict = torch.load("./model/esim_bert/esim_bert2/bert_2.pth").module.state_dict()
+model.module.load_state_dict(model_dict)
 
 criterion = nn.BCELoss()
-optimizer = torch.optim.Adam([{'params': model.parameters(), 'lr': 2e-5},
+optimizer = torch.optim.Adam([{'params': model.parameters(), 'lr': 1e-5},
                               {'params': esim.parameters(), 'lr': 1e-3}], lr=1e-3)
 
-save_offset = 0
+# %%
+save_offset = 2
 num_epochs = 120
 for epoch in range(num_epochs):
 
@@ -195,6 +198,7 @@ for epoch in range(num_epochs):
     train_acc = 0
     train_count = 0
     esim.train()
+    # model.eval()
     train_iter = tqdm(dataiter)
     for sentences, label in train_iter:
         if torch.cuda.is_available():
@@ -237,7 +241,7 @@ for epoch in range(num_epochs):
     WriteSDC('log_esim_bert.log', 'epoch: {} train_acc: {} loss: {}\n'.format(
         epoch + 1 + save_offset, train_acc / train_count, train_loss / train_count))
 
-    if epoch % 3 != 0:
+    if epoch % 2 != 0:
         continue
     # %%
     eval_esim_bert(esim, model, eval_list, myData_eval, epoch, save_offset)
