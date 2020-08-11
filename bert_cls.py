@@ -17,15 +17,15 @@ from transformers import BertModel, BertConfig, BertTokenizer, BertForSequenceCl
 tokenizer = BertTokenizer.from_pretrained('./dataset/vocab')
 
 myDataset = ClsDataset(tokenizer, './dataset/101/cls_train', './dataset/cls_dict', 100)
-dataiter = DataLoader(myDataset, batch_size=120)
+dataiter = DataLoader(myDataset, batch_size=128)
 
 myData_eval = ClsDataset(tokenizer, './dataset/101/cls_test', './dataset/cls_dict', 100)
-dataiter_eval = DataLoader(myData_eval, batch_size=120)
+dataiter_eval = DataLoader(myData_eval, batch_size=128)
 
 # %%
 config = BertConfig.from_json_file('./dataset/bert_config.json')
 config.num_labels = len(myDataset.cls_label_2_id)
-model = BertForSequenceClassification.from_pretrained('./model/bert_pre58_4/pytorch_model.bin', config=config)
+model = BertForSequenceClassification.from_pretrained('./model/bert_pre58_1001/pytorch_model.bin', config=config)
 
 model.cuda()
 device = torch.device("cuda:2" if torch.cuda.is_available() else "cpu")
@@ -40,7 +40,7 @@ optimizer = optim.Adam(model.parameters(), lr=1e-5, weight_decay=0.)
 
 losses = []
 
-save_offset = 900
+save_offset = 1000
 num_epochs = 30
 for epoch in range(num_epochs):
     train_count = 0
