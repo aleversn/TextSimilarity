@@ -38,8 +38,8 @@ class SupremePredClsDataset(SupremeClsDataset):
         std_id = 0
         return sentence, attn_mask, std_id, exit_id, label
 
-LABEL_ID = '12'
-EPOCH_NUM = '16'
+LABEL_ID = '83'
+EPOCH_NUM = '6'
     
 tokenizer = BertTokenizer.from_pretrained('./dataset/vocab')
 

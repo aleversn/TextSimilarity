@@ -39,6 +39,18 @@ def max_length_of_train(filename):
         count.append(len(item[1]))
     return max, np.mean(count), np.median(count), np.argmax(np.bincount(count))
 
+def writeAnalysis(correct_id, pred_ids, scores):
+    result = ''
+    t = '{}'.format(correct_id)
+    c_list = []
+    for idx, it in enumerate(pred_ids):
+        c_list.append([it, scores[idx]])
+    c_list = sorted(c_list, key=lambda x: float(x[1]), reverse=True)
+    for it in c_list[:5]:
+        t += ',{},{:.3f}'.format(it[0], float(it[1]))
+    result += t
+    return result
+
 def eval(esim, eval_list, myData_eval, epoch, save_offset, log_name='log_eval_20200803.log'):
     with torch.no_grad():
         esim.eval()

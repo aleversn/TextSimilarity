@@ -224,4 +224,31 @@ class SupremeClsDataset(Dataset):
     
     def __len__ (self):
         return len(self.ori_list)
-        
+
+class JudgerClsDataset(SupremeClsDataset):
+
+    def __init__(self, tokenizer, file_name, std_1, std_2, padding_length=128, one_std=False):
+        self.tokenizer = tokenizer
+        self.padding_length = padding_length
+        self.data_init(file_name, std_1, std_2, one_std)
+        self.cls_vocab_init(std_1, std_2)
+
+    def cls_vocab_init(self, std_1, std_2):
+        self.cls_label_2_id = {}
+        self.cls_id_2_label = {}
+        self.cls_label_2_id[std_1] = 0
+        self.cls_id_2_label[0] = std_1
+        self.cls_label_2_id[std_2] = 1
+        self.cls_id_2_label[1] = std_2
+
+    def data_init(self, file_name, std_1, std_2, one_std=False):
+        with open(file_name, encoding='utf-8') as f:
+            self.ori_list = f.read().split('\n')
+        for i in range(len(self.ori_list) - 1, -1, -1):
+            std_id, ext_id, label_id, sentence = self.ori_list[i
+            ].strip().split('\t')
+            if one_std != False:
+                if int(std_id) != int(one_std):
+                    self.ori_list.pop(i)
+            elif int(std_id) != int(std_1) and int(std_id) != int(std_2):
+                self.ori_list.pop(i)
