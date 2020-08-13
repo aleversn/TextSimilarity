@@ -20,10 +20,10 @@ LABEL_ID = '1'
 tokenizer = BertTokenizer.from_pretrained('./dataset/vocab')
 
 myDataset = SupremeClsDataset(tokenizer, './dataset/supreme/l{}/s_train'.format(LABEL_ID), './dataset/supreme/l{}/std_dict'.format(LABEL_ID), 100)
-dataiter = DataLoader(myDataset, batch_size=120)
+dataiter = DataLoader(myDataset, batch_size=128)
 
 myData_eval = SupremeClsDataset(tokenizer, './dataset/supreme/l{}/s_dev'.format(LABEL_ID), './dataset/supreme/l{}/std_dict'.format(LABEL_ID), 100)
-dataiter_eval = DataLoader(myData_eval, batch_size=120)
+dataiter_eval = DataLoader(myData_eval, batch_size=128)
 
 # %%
 config = BertConfig.from_json_file('./dataset/bert_config.json')
@@ -35,12 +35,12 @@ device = torch.device("cuda:2" if torch.cuda.is_available() else "cpu")
 model = torch.nn.DataParallel(model, device_ids=[2, 3]).cuda()
 model.to(device)
 
-save_offset = 0
+save_offset = 900
 # model_dict = torch.load("./model/supreme/l{}/bert_supreme_{}.pth".format(LABEL_ID, save_offset)).module.state_dict()
 # model.module.load_state_dict(model_dict)
 
 # %%
-optimizer = optim.Adam(model.parameters(), lr=5e-5, weight_decay=0.)
+optimizer = optim.Adam(model.parameters(), lr=5e-5, weight_decay=0.01)
 
 losses = []
 

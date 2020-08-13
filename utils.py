@@ -117,6 +117,39 @@ def pred(esim, eval_list, myData_eval):
         for idx, item in enumerate(eval_list):
             f.write('\n{},{}'.format(item[1], result_std_id[idx]))
 
+def eval_bimpm(bimpm, eval_list, myData_eval, epoch, save_offset, log_name='log_eval_bimpm.log'):
+    with torch.no_grad():
+        bimpm.eval()
+        eval_correct_num = 0
+        eval_list_iter = tqdm(eval_list)
+        for idx, item in enumerate(eval_list_iter):
+            cur_eval_result_scores = torch.tensor([])
+            cur_eval_result_stdid = torch.LongTensor([])
+            myData_eval.make_data(item)
+            dataiter_eval = DataLoader(myData_eval, batch_size=1000)
+            for sentences, cur_std_id in dataiter_eval:
+                if torch.cuda.is_available():
+                    sentences = Variable(sentences.cuda())
+                    cur_std_id = Variable(cur_std_id.cuda())
+                    cur_eval_result_scores = Variable(cur_eval_result_scores.cuda())
+                    cur_eval_result_stdid = Variable(cur_eval_result_stdid.cuda())
+                else:
+                    sentences = Variable(sentences)
+                    cur_std_id = Variable(cur_std_id)
+                out = bimpm(sentences[:, 0, :], sentences[:, 1, :])
+                out = out[1]
+                pred_scores = out[:,1]
+                cur_eval_result_scores = torch.cat((cur_eval_result_scores, pred_scores))
+                cur_eval_result_stdid = torch.cat((cur_eval_result_stdid,cur_std_id))
+            eval_list_iter.set_description('{}/{}'.format(idx + 1, len(eval_list)))
+            eval_list_iter.set_postfix(correct_num=eval_correct_num, eval_acc=eval_correct_num / (idx + 1))
+            max_item_index = cur_eval_result_scores.sort(descending=True)[1][0].data.item()
+            max_item_id = cur_eval_result_stdid[max_item_index].data.item()
+            if max_item_id == int(item[0]):
+                eval_correct_num += 1
+        print('Eval_acc: {}\n'.format(eval_correct_num / len(eval_list)))
+        WriteSDC(log_name, 'epoch: {} eval_num: {} eval_acc: {}\n'.format(epoch + 1 + save_offset, eval_correct_num, eval_correct_num / len(eval_list)))
+
 def eval_bert(model, eval_list, myData_eval, epoch, save_offset, log_name='log_eval_20200803.log'):
     with torch.no_grad():
         model.eval()
