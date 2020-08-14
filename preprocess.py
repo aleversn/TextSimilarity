@@ -223,6 +223,6 @@ class Preprocess():
 # Preprocess.generate_cls_train_by_label('./dataset/101/c_dev_with_label', '{}'.format(L), './dataset/supreme/l{}/s_dev'.format(L))
 
 # %%
-# Preprocess.combineSupreme('./result/result_x2.csv', ['./supreme/l1', './supreme/l3', './supreme/l4', './supreme/l7', './supreme/l10', './supreme/l12', './supreme/l2', './supreme/l6', './supreme/l9', './supreme/l61', './supreme/l83', './supreme/l5', './supreme/l13', './supreme/l63'], './result.csv')
+# Preprocess.combineSupreme('./result/result_x2.csv', ['./supreme/l1', './supreme/l3', './supreme/l4', './supreme/l7', './supreme/l10', './supreme/l12', './supreme/l2', './supreme/l6', './supreme/l9', './supreme/l61', './supreme/l83', './supreme/l5', './supreme/l13', './supreme/l63', './supreme/l16', './supreme/l11', './supreme/l8', './supreme/l81'], './result.csv')
 
 # %%

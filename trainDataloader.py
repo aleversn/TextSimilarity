@@ -252,3 +252,69 @@ class JudgerClsDataset(SupremeClsDataset):
                     self.ori_list.pop(i)
             elif int(std_id) != int(std_1) and int(std_id) != int(std_2):
                 self.ori_list.pop(i)
+
+class SupremeSimDataset(Dataset):
+    def __init__(self, tokenizer, file_name, std_name, padding_length=128):
+        self.tokenizer = tokenizer
+        self.padding_length = padding_length
+        self.data_init(file_name)
+        self.label_dict, self.std_dict, self.std_list = Preprocess.load_std(std_name)
+    
+    def data_init(self, file_name):
+        with open(file_name, encoding='utf-8', mode='r') as f:
+            self.ori_list = f.read().split('\n')
+        self.train_dict = {}
+        for line in self.ori_list:
+            std_id, ext_id, label_id, sentence = line.strip().split('\t')
+            if std_id not in self.train_dict:
+                self.train_dict[std_id] = []
+            self.train_dict[std_id].append([std_id, ext_id, label_id, sentence])
+    
+    def make_data(self):
+        self.train_list = []
+        for line in self.ori_list:
+            std_id, ext_id, label_id, sentence = line.strip().split('\t')
+            std_answer = self.std_dict[std_id][2]
+            self.train_list.append([sentence, std_answer, 1])
+            self.train_list.append([sentence, random.sample(self.train_dict[std_id], 1)[0][3], 1])
+            for oth in random.sample(self.label_dict[label_id], 5):
+                if std_id != oth[0]:
+                    self.train_list.append([sentence, oth[1], 0])
+                    break
+            for oth in random.sample(self.ori_list, 5):
+                oth_std_id, _, _, oth_sentence = oth.strip().split('\t')
+                if std_id != oth_std_id:
+                    self.train_list.append([sentence, oth_sentence, 0])
+                    break
+    
+    def encode(self, a, b, return_type='esim'):
+        if return_type == 'esim':
+            a = self.tokenizer(a, add_special_tokens=False, max_length=self.padding_length, padding='max_length', truncation=True)['input_ids']
+            b = self.tokenizer(b, add_special_tokens=False, max_length=self.padding_length, padding='max_length', truncation=True)['input_ids']
+            return torch.tensor([a, b])
+        
+        sentence = '{}[SEP]{}'.format(a, b)
+        T = self.tokenizer(sentence, add_special_tokens=True, max_length=self.padding_length, padding='max_length', truncation=True)
+        sentence = T['input_ids']
+        attn_mask = T['attention_mask']
+        token_type_id = T['token_type_ids']
+        return torch.tensor(sentence), torch.tensor(attn_mask), torch.tensor(token_type_id)
+    
+    def make_jury(self, target, return_type='esim'):
+        train = torch.tensor([])
+        max_len = 100 if len(self.train_dict[target[0]]) >= 100 else len(self.train_dict[target[0]])
+        for item in random.sample(self.train_dict[target[0]], max_len):
+            train_item = self.encode(target[3], item[3], return_type)
+            train = torch.cat((train, train_item.unsqueeze(0)))
+        return train
+    
+    def __getitem__(self, idx):
+        s1, s2, label = self.train_list[idx]
+
+        sentence = self.encode(s1, s2)
+        label = torch.tensor(label)
+
+        return sentence, label
+    
+    def __len__(self):
+        return len(self.train_list)

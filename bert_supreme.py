@@ -15,7 +15,7 @@ from trainDataloader import SupremeClsDataset
 from transformers import BertModel, BertConfig, BertTokenizer, BertForSequenceClassification
 
 # %%
-LABEL_ID = '1'
+LABEL_ID = '2'
 
 tokenizer = BertTokenizer.from_pretrained('./dataset/vocab')
 
@@ -40,7 +40,7 @@ save_offset = 900
 # model.module.load_state_dict(model_dict)
 
 # %%
-optimizer = optim.Adam(model.parameters(), lr=5e-5, weight_decay=0.01)
+optimizer = optim.Adam(model.parameters(), lr=5e-5, weight_decay=0.)
 
 losses = []
 
